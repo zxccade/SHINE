@@ -18,7 +18,7 @@ Zixu Cheng\*<sup>1</sup>, Yujiang Pu\*<sup>2</sup>, Shaogang Gong<sup>1</sup>, P
 
 <b>ActivityNet-CG</b> : Download C3D feature files for ActivityNet-CG dataset from [MS-2D-TAN](https://github.com/microsoft/VideoX/tree/master/MS-2D-TAN). 
 
-**Text Features** : We provide our hierarchical negative query features here. (To be uploaded)
+**Text Features** : We provide our hierarchical negative query features [here](https://www.dropbox.com/scl/fo/k20c6dsx3akj5hvvcasd1/AECnFTQXeooQndQyr3FMNgM?rlkey=i5duyuplt9nmtfn7es14lms0v&st=43m6tqxs&dl=0). (DropBox)
 
 <b>2. Install dependencies.</b>
 
@@ -70,7 +70,7 @@ bash shine/scripts/inference_charades.sh path/to/your/ckpt 'val'
 bash shine/scripts/inference_anet.sh path/to/your/ckpt 'val'
 ```
 
-We also provide our checkpoints here. (To be uploaded)
+We also provide our checkpoints [here](https://www.dropbox.com/scl/fo/xj48zvc9wv0pwh5l57q6h/APrObNTytkEzo5ZTf7qHyOw?rlkey=fjcdyeotso0yiwsgib9neg7s7&st=qz2cv2ie&dl=0). (DropBox)
 
 ## Contributors and Contact
 
