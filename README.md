@@ -1,6 +1,6 @@
 # SHINE: Saliency-aware HIerarchical NEgative Ranking for Compositional Temporal Grounding -- ECCV2024
 
-This is the implementation for the paper "SHINE: Saliency-aware HIerarchical NEgative Ranking for Compositional Temporal Grounding" (**ECCV 2024**):  [ArXiv version](https://arxiv.org/abs/2407.05118).
+This is the implementation for the paper "SHINE: Saliency-aware HIerarchical NEgative Ranking for Compositional Temporal Grounding" (**ECCV 2024**): [paper](https://link.springer.com/chapter/10.1007/978-3-031-72655-2_23),  [ArXiv version](https://arxiv.org/abs/2407.05118).
 
 by
 
