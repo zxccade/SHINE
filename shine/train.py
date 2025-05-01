@@ -18,8 +18,8 @@ from torch.utils.tensorboard import SummaryWriter
 from shine.config import BaseOptions
 from shine.start_end_dataset import \
     StartEndDataset, start_end_collate, prepare_batch_inputs, prepare_batch_inputs_train
-from shine.start_end_dataset_audio import \
-    StartEndDataset_audio, start_end_collate_audio, prepare_batch_inputs_audio
+# from shine.start_end_dataset_audio import \
+    # StartEndDataset_audio, start_end_collate_audio, prepare_batch_inputs_audio
 from shine.inference import eval_epoch, start_inference, setup_model
 from utils.basic_utils import AverageMeter, dict_to_markdown
 from utils.model_utils import count_parameters
@@ -379,6 +379,7 @@ def start_training():
             max_windows=opt.max_windows,
             span_loss_type=opt.span_loss_type,
             txt_drop_ratio=opt.txt_drop_ratio,
+            # dset_domain=opt.dset_domain,
             hn_num=opt.hn_num,
         )
         dataset_config["data_path"] = opt.train_path
@@ -401,6 +402,7 @@ def start_training():
             max_windows=opt.max_windows,
             span_loss_type=opt.span_loss_type,
             txt_drop_ratio=opt.txt_drop_ratio,
+            # dset_domain=opt.dset_domain,
             hn_num=opt.hn_num,
         )
         dataset_config["data_path"] = opt.train_path
@@ -428,8 +430,11 @@ def start_training():
     count_parameters(model)
     logger.info("Start Training...")
     
-
-    train(model, criterion, optimizer, lr_scheduler, train_dataset, eval_datasets, opt)
+    # For tvsum dataset, use train_hl function
+    if opt.dset_name in ['tvsum']:
+        train_hl(model, criterion, optimizer, lr_scheduler, train_dataset, eval_datasets, opt)
+    else:
+        train(model, criterion, optimizer, lr_scheduler, train_dataset, eval_datasets, opt)
     
     return opt.ckpt_filepath.replace(".ckpt", "_best.ckpt"), opt.eval_split_name, opt.eval_path, opt.debug, opt
 

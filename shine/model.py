@@ -234,7 +234,7 @@ class SetCriterion(nn.Module):
     """
 
     def __init__(self, matcher, weight_dict, eos_coef, losses, temperature, span_loss_type, max_v_l,
-                 saliency_margin=1, q=8, hn_num=3, coarse_coef=1.0, fine_coef=1.0,
+                 saliency_margin=1, use_matcher=True, q=8, hn_num=3, coarse_coef=1.0, fine_coef=1.0, 
                  coarse_margin=[1.0, 2.0], fine_margin=[0.25, 0.25, 0.25, 0.25], ranking_type='red', 
                  use_saliency_loss=False):
         """ Create the criterion.
@@ -264,7 +264,9 @@ class SetCriterion(nn.Module):
         empty_weight = torch.ones(2)
         empty_weight[-1] = self.eos_coef  # lower weight for background (index 1, foreground index 0)
         self.register_buffer('empty_weight', empty_weight)
-
+        
+        # for tvsum,
+        self.use_matcher = use_matcher
 
         # for coarse-to-fine ranking
         self.q = q
@@ -491,8 +493,12 @@ class SetCriterion(nn.Module):
         # list(tuples), each tuple is (pred_span_indices, tgt_span_indices)
 
         # only for HL, do not use matcher
-        indices = None
-        losses_target = ["saliency"]
+        if self.use_matcher:
+            indices = self.matcher(outputs_without_aux, targets)
+            losses_target = self.losses
+        else:
+            indices = None
+            losses_target = ["saliency"]
 
         # Compute all the requested losses
         losses = {}
@@ -504,8 +510,12 @@ class SetCriterion(nn.Module):
         if 'aux_outputs' in outputs:
             for i, aux_outputs in enumerate(outputs['aux_outputs']):
                 # indices = self.matcher(aux_outputs, targets)
-                indices = None
-                losses_target = ["saliency"]
+                if self.use_matcher:
+                    indices = self.matcher(aux_outputs, targets)
+                    losses_target = self.losses
+                else:
+                    indices = None
+                    losses_target = ["saliency"]    
                 # for loss in self.losses:
                 for loss in losses_target:
                     if "saliency" == loss:  # skip as it is only in the top layer
@@ -624,14 +634,16 @@ def build_model(args):
     losses = ['spans', 'labels', 'saliency']
     if args.contrastive_align_loss:
         losses += ["contrastive_align"]
-
+        
+    # For tvsum dataset
+    use_matcher = not (args.dset_name == 'tvsum')
         
     criterion = SetCriterion(
         matcher=matcher, weight_dict=weight_dict, losses=losses,
         eos_coef=args.eos_coef, temperature=args.temperature,
         span_loss_type=args.span_loss_type, max_v_l=args.max_v_l,
-        saliency_margin=args.saliency_margin, hn_num=args.hn_num,
-        coarse_coef=args.coarse_coef, fine_coef=args.fine_coef,
+        saliency_margin=args.saliency_margin, use_matcher=use_matcher,
+        hn_num=args.hn_num, coarse_coef=args.coarse_coef, fine_coef=args.fine_coef,
         coarse_margin=args.coarse_margin, fine_margin=args.fine_margin,
         ranking_type=args.ranking_type, use_saliency_loss=args.use_saliency_loss,
     )

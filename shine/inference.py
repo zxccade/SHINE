@@ -14,8 +14,8 @@ from shine.config import TestOptions
 from shine.model import build_model
 from shine.span_utils import span_cxw_to_xx
 from shine.start_end_dataset import StartEndDataset, start_end_collate, prepare_batch_inputs
-from shine.start_end_dataset_audio import \
-    StartEndDataset_audio, start_end_collate_audio, prepare_batch_inputs_audio
+# from shine.start_end_dataset_audio import \
+    # StartEndDataset_audio, start_end_collate_audio, prepare_batch_inputs_audio
 from shine.postprocessing_shine import PostProcessorDETR
 from standalone_eval.eval import eval_submission
 from utils.basic_utils import save_jsonl, save_json
@@ -159,14 +159,15 @@ def compute_hl_results(model, eval_loader, opt, epoch_i=None, criterion=None, tb
             video_ap_collected.append(video_ap)  
 
     mean_ap = np.mean(video_ap_collected)
-    submission = dict(mAP=round(mean_ap, 5))
+    submmission = dict(mAP=round(mean_ap, 5))
+    
 
     # tensorboard writer
     if write_tb and criterion:
         for k, v in loss_meters.items():
             tb_writer.add_scalar("Eval/{}".format(k), v.avg, epoch_i + 1)
 
-    return submission, loss_meters
+    return submmission, loss_meters 
 
 
 
@@ -244,7 +245,7 @@ def compute_mr_results(model, eval_loader, opt, epoch_i=None, criterion=None, tb
         min_w_l=opt.clip_length, max_w_l=150, move_window_method="left",
         process_func_names=("clip_ts", "round_multiple")
     )
-    if opt.dset_name != "anet":
+    if opt.dset_name != 'anet':
         mr_res = post_processor(mr_res)
     return mr_res, loss_meters
 
@@ -283,13 +284,27 @@ def eval_epoch(model, eval_dataset, opt, save_submission_filename, epoch_i=None,
             pin_memory=opt.pin_memory
         )
 
-    submission, eval_loss_meters = get_eval_res(model, eval_loader, opt, epoch_i, criterion, tb_writer)
+    # tvsum 
+    if opt.dset_name in ['tvsum']:
+        metrics, eval_loss_meters = compute_hl_results(model, eval_loader, opt, epoch_i, criterion, tb_writer)
+        
+        # to match original save format
+        submission = [
+            {"brief": metrics}
+        ]
+        submission_path = os.path.join(opt.results_dir, "latest_metric.jsonl")
+        save_jsonl(submission, submission_path)
 
-    if opt.no_sort_results:
-        save_submission_filename = save_submission_filename.replace(".jsonl", "_unsorted.jsonl")
-    metrics, metrics_nms, latest_file_paths = eval_epoch_post_processing(
-        submission, opt, eval_dataset.data, save_submission_filename)
-    return metrics, metrics_nms, eval_loss_meters, latest_file_paths
+        return submission[0], submission[0], eval_loss_meters, [submission_path]
+
+    else:
+        submission, eval_loss_meters = get_eval_res(model, eval_loader, opt, epoch_i, criterion, tb_writer)
+            
+        if opt.no_sort_results:
+            save_submission_filename = save_submission_filename.replace(".jsonl", "_unsorted.jsonl")
+        metrics, metrics_nms, latest_file_paths = eval_epoch_post_processing(
+            submission, opt, eval_dataset.data, save_submission_filename)  
+        return metrics, metrics_nms, eval_loss_meters, latest_file_paths
 
 
 def setup_model(opt):
@@ -368,6 +383,7 @@ def start_inference(train_opt=None, split=None, splitfile=None):
                 load_labels=loadlabel,  # opt.eval_split_name == "val",
                 span_loss_type=opt.span_loss_type,
                 txt_drop_ratio=0,
+                # dset_domain=opt.dset_domain,
             )
         else:
             print("Video+Audio Evaluation")
@@ -389,6 +405,7 @@ def start_inference(train_opt=None, split=None, splitfile=None):
                 load_labels=loadlabel,  # opt.eval_split_name == "val",
                 span_loss_type=opt.span_loss_type,
                 txt_drop_ratio=0,
+                # dset_domain=opt.dset_domain,
             )
 
 
