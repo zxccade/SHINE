@@ -6,11 +6,11 @@ results_root=results
 exp_id=charades_cg_i3d
 
 ######## data paths
-train_path=data/charades_cg_gpt_train.jsonl
+train_path=data/charades_cg/charades_cg_gpt_train.jsonl
 eval_path=()
-eval_path+=(data/charades_cg_test.jsonl)
-eval_path+=(data/charades_cg_novel_composition.jsonl)
-eval_path+=(data/charades_cg_novel_word.jsonl)
+eval_path+=(data/charades_cg/charades_cg_test.jsonl)
+eval_path+=(data/charades_cg/charades_cg_novel_composition.jsonl)
+eval_path+=(data/charades_cg/charades_cg_novel_word.jsonl)
 eval_split_name=val
 
 ######## setup video+text features
